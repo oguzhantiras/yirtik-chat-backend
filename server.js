@@ -7,9 +7,6 @@ const app = express();
 app.use(cors({
   origin: ["https://oguzhantiras.com", "https://www.oguzhantiras.com"]
 }));
-app.get("/health", (req, res) => {
-  res.json({ status: "ok" });
-});
 app.use(express.json());
 
 const SYSTEM_PROMPT = `Sen YırtıkPantolon AI asistanısın.
