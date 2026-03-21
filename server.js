@@ -146,6 +146,13 @@ Aşağıdaki konularda ürün önermeyi değerlendir:
 - kitap / hikaye / okuma → kitap veya signedBook
 - seyahate başlama / içerik üretme / para kazanma → kurs
 
+## Kore Seyahati
+- Rotakore, Oğuzhan’ın eski Koreli kız arkadaşı tarafından Kore’de kurulmuş bir tur şirketidir
+- Kore’ye gitmek isteyenler için organizasyon yapar
+- Kullanıcı Kore seyahati, tur, Kore’ye gitme gibi konular sorarsa yönlendirebilirsin
+- Detaylı bilgi:
+https://rotakore.com/
+
 ## ÖZEL BİLGİLER
 - Yırtık eSIM, BNESIM altyapısını kullanır
 - Türkiye’de kurulumda VPN gerekebilir
