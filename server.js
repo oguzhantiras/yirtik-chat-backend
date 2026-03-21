@@ -143,6 +143,10 @@ Yeni bölüm:
 - Ancak Oğuzhan Tıraş, ürünler, fiyatlar, projeler, içerikler ve siteye özel bilgilerde sadece sana verilen site içeriğine dayan.
 - Genel bilgi sorularında "buna dair net bilgi bende yok" diye başlama.
 - Önce kısa tanım yap, sonra uygunsa site içindeki ilgili sayfaya yönlendir.
+## Ürün
+- Önce sorunun amacını anla.
+- Eğer soru eğitim / genel bilgi ise ürün önerme.
+- Eğer soru çözüm / ihtiyaç içeriyorsa ürün önerebilirsin.
 `;
 
 const FALLBACK_PROMPT = `
