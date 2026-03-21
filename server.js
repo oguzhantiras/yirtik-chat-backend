@@ -228,8 +228,11 @@ https://rotakore.com/
 
 - Eğer ürün önerisi gerekiyorsa cevap sonunda sadece şu formatta yaz:
 [PRODUCT: esim]
-[PRODUCT: kitap]
 [PRODUCT: kurs]
+- İmzalı kitap için:
+[PRODUCT: signedBook]
+- E-book için:
+[PRODUCT: kitap]
 
 - Eğer ürün gerekmiyorsa HİÇBİR product etiketi yazma.
 `;
@@ -384,33 +387,6 @@ ${siteContext}
 `;
 }
 
-function getSuggestedProducts(question, reply = "") {
-  const text = normalizeText(`${question} ${reply}`);
-  const result = [];
-
-  if (text.includes("esim") || text.includes("internet") || text.includes("baglanti") || text.includes("sim")) {
-    result.push(PRODUCTS.esim);
-  }
-
-  if (text.includes("kurs") || text.includes("icerik") || text.includes("egitim") || text.includes("video")) {
-    result.push(PRODUCTS.course);
-  }
-
-  if (text.includes("imzali")) {
-    result.push(PRODUCTS.signedBook);
-  }
-
-  if (text.includes("kitap") || text.includes("hikaye") || text.includes("ebook") || text.includes("e-kitap")) {
-    result.push(PRODUCTS.book);
-  }
-
-  if (!result.length && (text.includes("ne satiyor") || text.includes("urun") || text.includes("ürün") || text.includes("neler var"))) {
-    result.push(PRODUCTS.esim, PRODUCTS.book, PRODUCTS.course);
-  }
-
-  return result.slice(0, 3);
-}
-
 app.post("/api/chat", async (req, res) => {
   const { messages } = req.body;
 const cleanMessages = messages.slice(-10).map(m => ({
@@ -448,11 +424,36 @@ const cleanMessages = messages.slice(-10).map(m => ({
         error: data?.error?.message || "Anthropic hatası"
       });
     }
+const rawReply = data?.content?.[0]?.text || "Şu an cevap veremedim.";
 
-    const reply = data?.content?.[0]?.text || "Şu an cevap veremedim.";
-    const products = getSuggestedProducts(lastUserMessage, reply);
+// AI cevabındaki ürün etiketlerini yakala
+const products = [];
 
-    res.json({ reply, products });
+if (rawReply.includes("[PRODUCT: esim]")) {
+  products.push(PRODUCTS.esim);
+}
+
+if (rawReply.includes("[PRODUCT: kitap]")) {
+  products.push(PRODUCTS.book);
+}
+if (rawReply.includes("[PRODUCT: signedBook]")) {
+  products.push(PRODUCTS.signedBook);
+}
+if (rawReply.includes("[PRODUCT: kurs]")) {
+  products.push(PRODUCTS.course);
+}
+
+// Etiketleri kullanıcıya görünmeden temizle
+const cleanReply = rawReply
+  .replace(/\[PRODUCT:\s*esim\]/gi, "")
+  .replace(/\[PRODUCT:\s*kitap\]/gi, "")
+  .replace(/\[PRODUCT:\s*kurs\]/gi, "")
+  .trim();
+
+res.json({
+  reply: cleanReply,
+  products
+});
   } catch (err) {
     console.error("SERVER ERROR:", err);
     res.status(500).json({ error: "Sunucu hatası" });
