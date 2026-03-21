@@ -289,7 +289,10 @@ function getSuggestedProducts(question, reply = "") {
 
 app.post("/api/chat", async (req, res) => {
   const { messages } = req.body;
-
+const cleanMessages = messages.slice(-10).map(m => ({
+  role: m.role,
+  content: m.content
+}));
   if (!Array.isArray(messages) || messages.length === 0) {
     return res.status(400).json({ error: "Geçersiz istek" });
   }
@@ -305,12 +308,12 @@ app.post("/api/chat", async (req, res) => {
         "x-api-key": process.env.ANTHROPIC_API_KEY,
         "anthropic-version": "2023-06-01"
       },
-      body: JSON.stringify({
-        model: "claude-haiku-4-5-20251001",
-        max_tokens: 700,
-        system: systemPrompt,
-        messages: messages.slice(-10)
-      })
+    body: JSON.stringify({
+  model: "claude-haiku-4-5-20251001",
+  max_tokens: 700,
+  system: systemPrompt,
+  messages: cleanMessages
+})
     });
 
     const data = await response.json();
