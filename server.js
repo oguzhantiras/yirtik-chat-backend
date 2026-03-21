@@ -32,13 +32,13 @@ const PAGE_CONFIG = [
     key: "book",
     url: "https://oguzhantiras.com/products/yirtik-pantolon-kitap",
     title: "E-Kitap",
-    keywords: ["kitap", "e-kitap", "ekitap", "hikayeler", "satın al", "satinal", "ürün", "urun"]
+   keywords: ["e-kitap", "ekitap", "pdf kitap"]
   },
   {
     key: "signedBook",
     url: "https://oguzhantiras.com/products/yirtik-pantolon-imzali-kitap",
     title: "İmzalı Kitap",
-    keywords: ["imzalı", "imzali", "kitap", "signed"]
+    keywords: ["imzalı", "imzali kitap", "fiziksel kitap"]
   },
   {
     key: "course",
@@ -283,7 +283,7 @@ function cleanPageText(text) {
     .filter(x => x.length > 20)
     .filter(x => !/sepete ekle|cookie|gizlilik|privacy|navigation|menu|arama|search|hesabim|account/i.test(x));
 
-  return lines.join("\n").slice(0, 2500);
+  return lines.join("\n").slice(0, 1000);
 }
 
 async function fetchPage(url) {
@@ -389,7 +389,7 @@ ${siteContext}
 
 app.post("/api/chat", async (req, res) => {
   const { messages } = req.body;
-const cleanMessages = messages.slice(-10).map(m => ({
+const cleanMessages = messages.slice(-4).map(m => ({
   role: m.role,
   content: m.content
 }));
@@ -410,7 +410,7 @@ const cleanMessages = messages.slice(-10).map(m => ({
       },
     body: JSON.stringify({
   model: "claude-haiku-4-5-20251001",
-  max_tokens: 700,
+  max_tokens: 300,
   system: systemPrompt,
   messages: cleanMessages
 })
