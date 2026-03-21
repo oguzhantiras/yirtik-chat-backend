@@ -155,8 +155,11 @@ https://rotakore.com/
 
 ## ÖZEL BİLGİLER
 - Yırtık eSIM, BNESIM altyapısını kullanır
-- Türkiye’de kurulumda VPN gerekebilir
-- Destek ve iade BNESIM tarafından sağlanır
+- Türkiye’de kurulumda sorun varsa VPN gerekebilir
+- 2 şekilde kurulum yapılır:
+  BNESIM tarafından gelen mailde bulunan,
+  • QR kod okutularak
+  • BNESIM uygulamasını indirerek kullanıcı adı ve şifre ile giriş yaparak
 - Hiç bir üründe iade yoktur. eSIM desteği BNESIM sağlar. Bunun dışına çıkma.
 - İmzalı kitap sadece Türkiye içi
 - Yurtdışı için e-book vardır
