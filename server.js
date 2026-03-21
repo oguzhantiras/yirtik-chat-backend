@@ -1,5 +1,4 @@
 import express from "express";
-import fetch from "node-fetch";
 import cors from "cors";
 
 const app = express();
@@ -8,98 +7,229 @@ app.use(cors({
   origin: ["https://oguzhantiras.com", "https://www.oguzhantiras.com"]
 }));
 
-app.use(express.json());
+app.use(express.json({ limit: "1mb" }));
 
-// Taranacak sayfalar
-const PAGES_TO_SCRAPE = [
-  "https://oguzhantiras.com",
-  "https://oguzhantiras.com/pages/links",
-  "https://oguzhantiras.com/products/yirtik-pantolon-kitap",
-  "https://oguzhantiras.com/products/yirtik-pantolon-imzali-kitap",
-  "https://oguzhantiras.com/products/dunya-turuna-cikma-ve-icerik-uretme-kursu",
-  "https://oguzhantiras.com/yirtik-esim",
-  "https://oguzhantiras.com/blogs/dunya-turu/yirtik-pantolon-oguzhan-tiras-kimdir",
-  "https://oguzhantiras.com/pages/dunya-turuna-cikmak-ve-icerik-uretmek",
-  "https://oguzhantiras.com/pages/seyahat-kaynaklari-ve-uygulamalar",
-  "https://oguzhantiras.com/blogs/dunya-turu"
+const PAGE_CONFIG = [
+  {
+    key: "home",
+    url: "https://oguzhantiras.com",
+    title: "Ana Sayfa",
+    keywords: ["oguzhan", "yırtıkpantolon", "yirtikpantolon", "kim", "hikaye", "genel"]
+  },
+  {
+    key: "links",
+    url: "https://oguzhantiras.com/pages/links",
+    title: "Linkler",
+    keywords: ["link", "sosyal medya", "youtube", "instagram", "tiktok", "facebook", "iletişim", "iletisim", "iş birliği", "is birligi", "medya"]
+  },
+  {
+    key: "bio",
+    url: "https://oguzhantiras.com/blogs/dunya-turu/yirtik-pantolon-oguzhan-tiras-kimdir",
+    title: "Oğuzhan Kimdir",
+    keywords: ["kimdir", "kim", "nereli", "üniversite", "universite", "eğitim", "egitim", "hayatı", "hayati", "biyografi", "kaç yaş", "kac yas"]
+  },
+  {
+    key: "book",
+    url: "https://oguzhantiras.com/products/yirtik-pantolon-kitap",
+    title: "E-Kitap",
+    keywords: ["kitap", "e-kitap", "ekitap", "hikayeler", "satın al", "satinal", "ürün", "urun"]
+  },
+  {
+    key: "signedBook",
+    url: "https://oguzhantiras.com/products/yirtik-pantolon-imzali-kitap",
+    title: "İmzalı Kitap",
+    keywords: ["imzalı", "imzali", "kitap", "signed"]
+  },
+  {
+    key: "course",
+    url: "https://oguzhantiras.com/products/dunya-turuna-cikma-ve-icerik-uretme-kursu",
+    title: "Kurs",
+    keywords: ["kurs", "eğitim", "egitim", "içerik üretimi", "icerik uretimi", "video", "ders"]
+  },
+  {
+    key: "esim",
+    url: "https://oguzhantiras.com/yirtik-esim",
+    title: "Yırtık eSIM",
+    keywords: ["esim", "internet", "sim", "paket", "data", "bağlantı", "baglanti", "yurtdışı internet", "yurtdisi internet"]
+  },
+  {
+    key: "resources",
+    url: "https://oguzhantiras.com/pages/seyahat-kaynaklari-ve-uygulamalar",
+    title: "Seyahat Kaynakları",
+    keywords: ["uygulama", "uygulamalar", "kaynak", "seyahat", "ucuz uçak", "ucuz ucak", "hostel", "backpack", "gezi"]
+  }
 ];
 
-// HTML'den temiz metin çıkar
-function extractText(html) {
-  return html
-    .replace(/<script[\s\S]*?<\/script>/gi, "")
-    .replace(/<style[\s\S]*?<\/style>/gi, "")
-    .replace(/<[^>]+>/g, " ")
-    .replace(/\s+/g, " ")
-    .trim()
-    .slice(0, 2000); // her sayfadan max 2000 karakter
+const BASE_RULES = `
+Sen Oğuzhan Tıraş'ın (YırtıkPantolon) resmi AI asistanısın.
+
+Kurallar:
+- Türkçe konuş.
+- Samimi, net, doğal ve kısa konuş.
+- Cevapları genelde 3-6 cümlede tut.
+- Sadece sana verilen site içeriklerine dayan.
+- Emin olmadığın şeyi uydurma.
+- Bilgi sitede yoksa açıkça "Buna dair net bilgi bende yok" de.
+- Ürün fiyatı gibi değişken konularda kesin konuşma; ilgili sayfaya yönlendir.
+- Uygun olduğunda ilgili linki paylaş.
+`;
+
+const FALLBACK_PROMPT = `
+${BASE_RULES}
+
+Şu an ayrıntılı site içeriği hazır değil. Yine de kısa ve dürüst cevap ver.
+`;
+
+let pageCache = {};
+let lastRefreshAt = null;
+
+function normalizeText(str = "") {
+  return str
+    .toLowerCase()
+    .replace(/ç/g, "c")
+    .replace(/ğ/g, "g")
+    .replace(/ı/g, "i")
+    .replace(/İ/g, "i")
+    .replace(/ö/g, "o")
+    .replace(/ş/g, "s")
+    .replace(/ü/g, "u");
 }
 
-// Tüm sayfaları tara ve birleştir
-async function scrapeAllPages() {
-  console.log("Siteler taranıyor...");
-  const results = [];
+function extractText(html) {
+  return html
+    .replace(/<script[\s\S]*?<\/script>/gi, " ")
+    .replace(/<style[\s\S]*?<\/style>/gi, " ")
+    .replace(/<noscript[\s\S]*?<\/noscript>/gi, " ")
+    .replace(/<svg[\s\S]*?<\/svg>/gi, " ")
+    .replace(/<!--[\s\S]*?-->/g, " ")
+    .replace(/<\/(p|div|section|article|h1|h2|h3|h4|li|br)>/gi, "\n")
+    .replace(/<[^>]+>/g, " ")
+    .replace(/&nbsp;/g, " ")
+    .replace(/&amp;/g, "&")
+    .replace(/\s+\n/g, "\n")
+    .replace(/\n{2,}/g, "\n")
+    .replace(/[ \t]{2,}/g, " ")
+    .trim();
+}
 
-  for (const url of PAGES_TO_SCRAPE) {
+function cleanPageText(text) {
+  const lines = text
+    .split("\n")
+    .map(x => x.trim())
+    .filter(Boolean)
+    .filter(x => x.length > 20)
+    .filter(x => !/sepete ekle|cookie|gizlilik|privacy|navigation|menu|arama|search|hesabim|account/i.test(x));
+
+  return lines.join("\n").slice(0, 2500);
+}
+
+async function fetchPage(url) {
+  const res = await fetch(url, {
+    headers: {
+      "User-Agent": "Mozilla/5.0 (compatible; YirtikPantolonBot/1.0)"
+    }
+  });
+
+  if (!res.ok) {
+    throw new Error(`Sayfa alınamadı: ${url} (${res.status})`);
+  }
+
+  const html = await res.text();
+  const text = cleanPageText(extractText(html));
+  return text;
+}
+
+async function refreshPages() {
+  const nextCache = {};
+
+  for (const page of PAGE_CONFIG) {
     try {
-      const res = await fetch(url, {
-        headers: { "User-Agent": "Mozilla/5.0" },
-        timeout: 10000
-      });
-      const html = await res.text();
-      const text = extractText(html);
-      const label = url.replace("https://oguzhantiras.com", "") || "/";
-      results.push(`=== Sayfa: ${label} ===\n${text}`);
-      console.log(`Tarandı: ${url}`);
-    } catch (e) {
-      console.error(`Taranamadı: ${url}`, e.message);
+      const text = await fetchPage(page.url);
+      nextCache[page.key] = {
+        ...page,
+        text
+      };
+      console.log(`OK: ${page.key}`);
+    } catch (err) {
+      console.error(`FAIL: ${page.key} -> ${err.message}`);
     }
   }
 
-  return results.join("\n\n");
-}
-
-// System prompt'u site içeriğiyle oluştur
-function buildSystemPrompt(siteContent) {
-  return `Sen Oğuzhan Tıraş'ın (YırtıkPantolon) resmi AI asistanısın.
-
-Aşağıda oguzhantiras.com sitesinin güncel içeriği var. Kullanıcıların sorularını bu içeriğe dayanarak cevapla.
-
-## Davranış Kuralları
-- Samimi, sıcak, motive edici konuş — Oğuzhan'ın sesini yansıt
-- Ürün fiyatı sorulunca ilgili ürün sayfasına yönlendir (fiyatlar değişken)
-- Bilmediğin şeyi uydurma, emin olmadığında açıkça söyle
-- Yanıtları kısa tut (3-5 cümle)
-- Türkçe konuş
-- Uygun yerlerde ilgili sayfaların linkini ver
-
-## Site İçeriği
-${siteContent}`;
-}
-
-// Global sistem prompt — başlangıçta yüklenir, 24 saatte bir güncellenir
-let SYSTEM_PROMPT = `Sen YırtıkPantolon AI asistanısın. Oğuzhan Tıraş, yolculukları ve ürünleri hakkında yardımcı olursun. Samimi, kısa, net konuş.`;
-
-async function refreshSiteContent() {
-  try {
-    const content = await scrapeAllPages();
-    SYSTEM_PROMPT = buildSystemPrompt(content);
-    console.log("System prompt güncellendi.");
-  } catch (e) {
-    console.error("Site tarama hatası:", e.message);
+  if (Object.keys(nextCache).length > 0) {
+    pageCache = nextCache;
+    lastRefreshAt = new Date().toISOString();
+    console.log("Site cache güncellendi.");
   }
 }
 
-// Sunucu başlarken tara, sonra her 24 saatte bir güncelle
-refreshSiteContent();
-setInterval(refreshSiteContent, 24 * 60 * 60 * 1000);
+function scorePage(question, page) {
+  const q = normalizeText(question);
+  let score = 0;
+
+  for (const kw of page.keywords) {
+    const k = normalizeText(kw);
+    if (q.includes(k)) score += 3;
+  }
+
+  const pageText = normalizeText(page.text || "");
+  const qWords = q.split(/\s+/).filter(w => w.length > 2);
+
+  for (const word of qWords) {
+    if (pageText.includes(word)) score += 1;
+  }
+
+  return score;
+}
+
+function getRelevantPages(question, limit = 3) {
+  const pages = Object.values(pageCache);
+
+  if (!pages.length) return [];
+
+  const scored = pages
+    .map(page => ({ page, score: scorePage(question, page) }))
+    .sort((a, b) => b.score - a.score);
+
+  const top = scored.filter(x => x.score > 0).slice(0, limit).map(x => x.page);
+
+  if (top.length) return top;
+
+  return scored.slice(0, 2).map(x => x.page);
+}
+
+function buildSystemPrompt(question) {
+  const relevantPages = getRelevantPages(question, 3);
+
+  if (!relevantPages.length) {
+    return FALLBACK_PROMPT;
+  }
+
+  const siteContext = relevantPages.map(page => {
+    return `### ${page.title}
+URL: ${page.url}
+İçerik:
+${page.text}`;
+  }).join("\n\n");
+
+  return `
+${BASE_RULES}
+
+Aşağıda kullanıcının sorusuyla en alakalı site içerikleri var.
+Cevabı öncelikle bunlara dayanarak ver.
+
+${siteContext}
+`;
+}
 
 app.post("/api/chat", async (req, res) => {
   const { messages } = req.body;
 
-  if (!messages || !Array.isArray(messages) || messages.length === 0) {
+  if (!Array.isArray(messages) || messages.length === 0) {
     return res.status(400).json({ error: "Geçersiz istek" });
   }
+
+  const lastUserMessage = [...messages].reverse().find(m => m.role === "user")?.content || "";
+  const systemPrompt = buildSystemPrompt(lastUserMessage);
 
   try {
     const response = await fetch("https://api.anthropic.com/v1/messages", {
@@ -112,29 +242,41 @@ app.post("/api/chat", async (req, res) => {
       body: JSON.stringify({
         model: "claude-haiku-4-5-20251001",
         max_tokens: 700,
-        system: SYSTEM_PROMPT,
+        system: systemPrompt,
         messages: messages.slice(-10)
       })
     });
 
     const data = await response.json();
 
-    if (data.error) {
-      return res.status(500).json({ error: data.error.message });
+    if (!response.ok) {
+      console.error("ANTHROPIC ERROR:", data);
+      return res.status(response.status).json({
+        error: data?.error?.message || "Anthropic hatası"
+      });
     }
 
     const reply = data?.content?.[0]?.text || "Şu an cevap veremedim.";
     res.json({ reply });
-
-  } catch (e) {
-    console.error(e);
+  } catch (err) {
+    console.error("SERVER ERROR:", err);
     res.status(500).json({ error: "Sunucu hatası" });
   }
 });
 
 app.get("/health", (req, res) => {
-  res.json({ status: "ok", promptReady: SYSTEM_PROMPT.length > 200 });
+  res.json({
+    status: "ok",
+    cachedPages: Object.keys(pageCache).length,
+    lastRefreshAt
+  });
 });
 
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(`Server çalışıyor: ${PORT}`));
+
+app.listen(PORT, async () => {
+  console.log(`Server çalışıyor: ${PORT}`);
+  await refreshPages();
+});
+
+setInterval(refreshPages, 1000 * 60 * 60 * 6);
