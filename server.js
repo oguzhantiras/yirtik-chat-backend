@@ -65,7 +65,7 @@ const PRODUCTS = {
     id: "book",
     title: "Yırtık Pantolon'dan Hikayeler",
     url: "https://oguzhantiras.com/products/yirtik-pantolon-kitap",
-    image: "https://oguzhantiras.com/cdn/shop/files/yirtik-pantolon-kitap.jpg",
+    image: "https://cdn.shopify.com/s/files/1/0654/5404/7384/files/yirtikpantolonkitap.png?v=1718282910",
     subtitle: "E-kitap",
     buttonText: "İncele"
   },
@@ -73,7 +73,7 @@ const PRODUCTS = {
     id: "signedBook",
     title: "Yırtık Pantolon İmzalı Kitap",
     url: "https://oguzhantiras.com/products/yirtik-pantolon-imzali-kitap",
-    image: "https://oguzhantiras.com/cdn/shop/files/yirtik-pantolon-imzali-kitap.jpg",
+    image: "https://cdn.shopify.com/s/files/1/0654/5404/7384/files/yirtikpantolonkitap.png?v=1718282910",
     subtitle: "İmzalı özel baskı",
     buttonText: "İncele"
   },
@@ -81,7 +81,7 @@ const PRODUCTS = {
     id: "course",
     title: "Dünya Turuna Çıkma ve İçerik Üretme Kursu",
     url: "https://oguzhantiras.com/products/dunya-turuna-cikma-ve-icerik-uretme-kursu",
-    image: "https://oguzhantiras.com/cdn/shop/files/dunya-turuna-cikma-ve-icerik-uretme-kursu.jpg",
+    image: "https://cdn.shopify.com/s/files/1/0654/5404/7384/files/dunyaturuvesosyalmedyayaicerikuretmekursu.jpg?v=1722887581",
     subtitle: "Kurs",
     buttonText: "Kursa Git"
   },
@@ -89,7 +89,7 @@ const PRODUCTS = {
     id: "esim",
     title: "Yırtık eSIM",
     url: "https://oguzhantiras.com/yirtik-esim",
-    image: "https://oguzhantiras.com/cdn/shop/files/yirtik-esim.jpg",
+    image: "https://cdn.shopify.com/s/files/1/0654/5404/7384/files/yirtikesimlogo.webp?v=1774052546",
     subtitle: "190+ ülke internet",
     buttonText: "eSIM'e Git"
   }
