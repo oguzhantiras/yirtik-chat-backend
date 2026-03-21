@@ -156,10 +156,10 @@ Aşağıdaki konularda ürün önermeyi değerlendir:
 
 Sosyal medya bilgileri sadece aşağıdaki gibidir, ASLA uydurma veya genelleme yapma:
 
-Instagram: @oguzhantiras
-TikTok: @yirtikpantolon
-YouTube: @yirtikpantolon
-Facebook: @yirtikoguz
+Instagram: https://www.instagram.com/oguzhantiras
+TikTok: https://www.tiktok.com/@yirtikpantolon
+YouTube: https://www.youtube.com/@yirtikpantolon
+Facebook: https://www.facebook.com/@yirtikoguz
 
 Emin olmadığın hiçbir bilgiyi ekleme.
 `;
