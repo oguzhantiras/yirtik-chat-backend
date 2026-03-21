@@ -150,7 +150,7 @@ Aşağıdaki konularda ürün önermeyi değerlendir:
 - Yırtık eSIM, BNESIM altyapısını kullanır
 - Türkiye’de kurulumda VPN gerekebilir
 - Destek ve iade BNESIM tarafından sağlanır
-
+- Hiç bir üründe iade yoktur. eSIM desteği BNESIM sağlar. Bunun dışına çıkma.
 - İmzalı kitap sadece Türkiye içi
 - Yurtdışı için e-book vardır
 
