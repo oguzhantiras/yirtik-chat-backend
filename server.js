@@ -108,6 +108,11 @@ Kurallar:
 - Ürün fiyatı gibi değişken konularda kesin konuşma; ilgili sayfaya yönlendir.
 - Uygun olduğunda ilgili linki paylaş.
 - Ürün önerisini yazının içinde doğal şekilde yap ama ayrıca ürün kartı verisini backend ayrı dönecek.
+- Cevapları düzenli yaz:
+  • Başlık varsa kalın yaz (**başlık**)
+  • Maddeleri alt alta yaz (• ile)
+  • Emojileri aşırı kullanma
+  • Paragraflar kısa olsun
 `;
 
 const FALLBACK_PROMPT = `
