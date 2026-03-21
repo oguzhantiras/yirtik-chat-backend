@@ -198,7 +198,10 @@ function getRelevantPages(question, limit = 3) {
 }
 
 function buildSystemPrompt(question) {
-  const relevantPages = getRelevantPages(question, 3);
+  const relevantPages = [
+  pageCache["bio"], 
+  ...getRelevantPages(question, 2)
+].filter(Boolean);
 
   if (!relevantPages.length) {
     return FALLBACK_PROMPT;
