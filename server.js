@@ -153,6 +153,15 @@ Aşağıdaki konularda ürün önermeyi değerlendir:
 
 - İmzalı kitap sadece Türkiye içi
 - Yurtdışı için e-book vardır
+
+Sosyal medya bilgileri sadece aşağıdaki gibidir, ASLA uydurma veya genelleme yapma:
+
+Instagram: @oguzhantiras
+TikTok: @yirtikpantolon
+YouTube: @yirtikpantolon
+Facebook: @yirtikoguz
+
+Emin olmadığın hiçbir bilgiyi ekleme.
 `;
 const FALLBACK_PROMPT = `
 ${BASE_RULES}
