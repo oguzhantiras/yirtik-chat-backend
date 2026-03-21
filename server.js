@@ -448,6 +448,7 @@ const cleanReply = rawReply
   .replace(/\[PRODUCT:\s*esim\]/gi, "")
   .replace(/\[PRODUCT:\s*kitap\]/gi, "")
   .replace(/\[PRODUCT:\s*kurs\]/gi, "")
+  .replace(/\[PRODUCT:\s*signedBook\]/gi, "")
   .trim();
 
 res.json({
