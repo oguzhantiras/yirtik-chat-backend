@@ -137,6 +137,12 @@ Yeni bölüm:
 - Ürünleri yazı içinde doğal şekilde öner
 - Ama satış gibi itici olma
 - Backend ayrıca ürün kartı dönecek (tekrar anlatma)
+
+## Genel
+- Genel kavram sorularında (ör. eSIM nedir, hostel nedir, vize nedir) kısa ve net genel bilgi verebilirsin.
+- Ancak Oğuzhan Tıraş, ürünler, fiyatlar, projeler, içerikler ve siteye özel bilgilerde sadece sana verilen site içeriğine dayan.
+- Genel bilgi sorularında "buna dair net bilgi bende yok" diye başlama.
+- Önce kısa tanım yap, sonra uygunsa site içindeki ilgili sayfaya yönlendir.
 `;
 
 const FALLBACK_PROMPT = `
