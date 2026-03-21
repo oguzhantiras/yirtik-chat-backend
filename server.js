@@ -60,6 +60,41 @@ const PAGE_CONFIG = [
   }
 ];
 
+const PRODUCTS = {
+  book: {
+    id: "book",
+    title: "Yırtık Pantolon'dan Hikayeler",
+    url: "https://oguzhantiras.com/products/yirtik-pantolon-kitap",
+    image: "https://oguzhantiras.com/cdn/shop/files/yirtik-pantolon-kitap.jpg",
+    subtitle: "E-kitap",
+    buttonText: "İncele"
+  },
+  signedBook: {
+    id: "signedBook",
+    title: "Yırtık Pantolon İmzalı Kitap",
+    url: "https://oguzhantiras.com/products/yirtik-pantolon-imzali-kitap",
+    image: "https://oguzhantiras.com/cdn/shop/files/yirtik-pantolon-imzali-kitap.jpg",
+    subtitle: "İmzalı özel baskı",
+    buttonText: "İncele"
+  },
+  course: {
+    id: "course",
+    title: "Dünya Turuna Çıkma ve İçerik Üretme Kursu",
+    url: "https://oguzhantiras.com/products/dunya-turuna-cikma-ve-icerik-uretme-kursu",
+    image: "https://oguzhantiras.com/cdn/shop/files/dunya-turuna-cikma-ve-icerik-uretme-kursu.jpg",
+    subtitle: "Kurs",
+    buttonText: "Kursa Git"
+  },
+  esim: {
+    id: "esim",
+    title: "Yırtık eSIM",
+    url: "https://oguzhantiras.com/yirtik-esim",
+    image: "https://oguzhantiras.com/cdn/shop/files/yirtik-esim.jpg",
+    subtitle: "190+ ülke internet",
+    buttonText: "eSIM'e Git"
+  }
+};
+
 const BASE_RULES = `
 Sen Oğuzhan Tıraş'ın (YırtıkPantolon) resmi AI asistanısın.
 
@@ -72,6 +107,7 @@ Kurallar:
 - Bilgi sitede yoksa açıkça "Buna dair net bilgi bende yok" de.
 - Ürün fiyatı gibi değişken konularda kesin konuşma; ilgili sayfaya yönlendir.
 - Uygun olduğunda ilgili linki paylaş.
+- Ürün önerisini yazının içinde doğal şekilde yap ama ayrıca ürün kartı verisini backend ayrı dönecek.
 `;
 
 const FALLBACK_PROMPT = `
@@ -199,9 +235,9 @@ function getRelevantPages(question, limit = 3) {
 
 function buildSystemPrompt(question) {
   const relevantPages = [
-  pageCache["bio"], 
-  ...getRelevantPages(question, 2)
-].filter(Boolean);
+    pageCache["bio"],
+    ...getRelevantPages(question, 2)
+  ].filter(Boolean);
 
   if (!relevantPages.length) {
     return FALLBACK_PROMPT;
@@ -222,6 +258,33 @@ Cevabı öncelikle bunlara dayanarak ver.
 
 ${siteContext}
 `;
+}
+
+function getSuggestedProducts(question, reply = "") {
+  const text = normalizeText(`${question} ${reply}`);
+  const result = [];
+
+  if (text.includes("esim") || text.includes("internet") || text.includes("baglanti") || text.includes("sim")) {
+    result.push(PRODUCTS.esim);
+  }
+
+  if (text.includes("kurs") || text.includes("icerik") || text.includes("egitim") || text.includes("video")) {
+    result.push(PRODUCTS.course);
+  }
+
+  if (text.includes("imzali")) {
+    result.push(PRODUCTS.signedBook);
+  }
+
+  if (text.includes("kitap") || text.includes("hikaye") || text.includes("ebook") || text.includes("e-kitap")) {
+    result.push(PRODUCTS.book);
+  }
+
+  if (!result.length && (text.includes("ne satiyor") || text.includes("urun") || text.includes("ürün") || text.includes("neler var"))) {
+    result.push(PRODUCTS.esim, PRODUCTS.book, PRODUCTS.course);
+  }
+
+  return result.slice(0, 3);
 }
 
 app.post("/api/chat", async (req, res) => {
@@ -260,7 +323,9 @@ app.post("/api/chat", async (req, res) => {
     }
 
     const reply = data?.content?.[0]?.text || "Şu an cevap veremedim.";
-    res.json({ reply });
+    const products = getSuggestedProducts(lastUserMessage, reply);
+
+    res.json({ reply, products });
   } catch (err) {
     console.error("SERVER ERROR:", err);
     res.status(500).json({ error: "Sunucu hatası" });
