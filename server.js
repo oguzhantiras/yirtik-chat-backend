@@ -225,6 +225,13 @@ https://rotakore.com/
 - İlham ver
 - Gerektiğinde yönlendir
 - Ama asla spam satış yapma
+
+- Eğer ürün önerisi gerekiyorsa cevap sonunda sadece şu formatta yaz:
+[PRODUCT: esim]
+[PRODUCT: kitap]
+[PRODUCT: kurs]
+
+- Eğer ürün gerekmiyorsa HİÇBİR product etiketi yazma.
 `;
 
 const FALLBACK_PROMPT = `
